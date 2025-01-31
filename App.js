@@ -1,10 +1,41 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet,View } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import { useEffect } from 'react';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function App() {
+  useEffect(() => {
+      const subscription = Notifications.addNotificationReceivedListener((notificaton) => {
+        console.log(notificaton);
+        console.log('NOTIFICATION HANDLER');
+        const username = notificaton.request.content.data.username;
+        console.log(username);
+      });
+      return () => subscription.remove();
+    }, []);
+  function notificationHandler(){
+    Notifications.scheduleNotificationAsync({
+      content:{
+        title: 'My local notification',
+        body: 'My first local notification',
+        data: {username: 'SAI'}
+      },
+      trigger: {
+        second: 5,
+      }
+    });
+  }
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+    <Button title="Send Notification" onPress={notificationHandler}/>
       <StatusBar style="auto" />
     </View>
   );

@@ -3,6 +3,8 @@ import { Button, StyleSheet,View } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
 
+// Refere to this documentation to understand the notification feautre and how to implement it in the React native applications.
+//https://docs.expo.dev/versions/latest/sdk/notifications/#addnotificationreceivedlistenerlistener
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -13,13 +15,25 @@ Notifications.setNotificationHandler({
 
 export default function App() {
   useEffect(() => {
-      const subscription = Notifications.addNotificationReceivedListener((notificaton) => {
+    //Enabling the notifications
+      const subscription1 = Notifications.addNotificationReceivedListener((notificaton) => {
         console.log(notificaton);
         console.log('NOTIFICATION HANDLER');
         const username = notificaton.request.content.data.username;
         console.log(username);
       });
-      return () => subscription.remove();
+
+      //Handling the notifications with the response
+      const subscription2 = Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log('NOTIFICATION RESPONSE RECIEVED');
+        console.log(response);
+        const username = response.request.content.data.username;
+        console.log(username);
+      });
+      return () => {
+        subscription1.remove();
+        subscription2.remove();
+      }
     }, []);
   function notificationHandler(){
     Notifications.scheduleNotificationAsync({
@@ -29,6 +43,7 @@ export default function App() {
         data: {username: 'SAI'}
       },
       trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
         second: 5,
       }
     });
